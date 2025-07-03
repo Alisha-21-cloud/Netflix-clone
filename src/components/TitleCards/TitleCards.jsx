@@ -1,20 +1,40 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import './TitleCards.css'
-import cards_data from '../../assets/cards/Cards_data'
 
+const TitleCards = ({ title, category }) => {
+  const [apiData, setApiData] = useState([])
 
-const TitleCards = ({title, category}) => {
-  
+  const options = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+      Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyZGJlODc0YTQ0NzgyZTliNTU1YTAyYTlhYjAwNzllZSIsIm5iZiI6MTc1MDI1NTM3MC45NTgwMDAyLCJzdWIiOiI2ODUyYzcwYWQ2NTYzYzg5MzM1ODM0ZTUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.1_exqe_RH38R2syX6RY4GkPJa7pFrTja-qfeBKoeBO4'
+    }
+  }
+
+  useEffect(() => {
+    fetch(`https://api.themoviedb.org/3/movie/${category?category:"now_playing"}?language=en-US&page=1`, options)
+      .then(res => res.json())
+      .then(res => setApiData(res.results))
+      .catch(err => console.error(err))
+  }, [])
+
   return (
     <div className='title-cards'>
-      <h2>{title?title:"Popular on Netflix"}</h2>
-      <div className="card-list" >
-        {cards_data.map((card, index) => {
-          return <div className="card" key={index}>
-            <img src={card.image} alt="" />
-            <p>{card.name}</p>
-          </div>
-        })}
+      <h2>{title || "Popular on Netflix"}</h2>
+      <div className="card-list">
+        {apiData.length === 0 ? (
+          <p>Loading movies...</p>
+        ) : (
+          apiData.map(card => (
+            card.backdrop_path && (
+              <div className="card" key={card.id}>
+                <img src={`https://image.tmdb.org/t/p/w500${card.backdrop_path}`} alt={card.original_title} />
+                <p>{card.original_title}</p>
+              </div>
+            )
+          ))
+        )}
       </div>
     </div>
   )
